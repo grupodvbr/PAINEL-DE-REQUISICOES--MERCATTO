@@ -436,7 +436,7 @@ if (carrinhoSalvo) {
       novaOrdem.forEach(i => {
         const td = document.createElement('td');
         let valor = linha[i];
-        if (i === 7 && valor.toLowerCase() === "processando") valor = "PENDENTE";
+        if (i === 7 && valor.toLowerCase() === "Pendente") valor = "PENDENTE";
 
         td.innerHTML = i === 0
           ? new Date(linha[i]).toLocaleString('pt-BR')
