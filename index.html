@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel de Requisições Mercatto Delícia</title>
+
+  <style>
+    :root {
+      --cor-fundo: #ffffff;
+      --cor-texto: #000000;
+      --cor-botao: #007bff;
+      --cor-botao-vermelho: #dc3545;
+      --cor-destaque: #007bff;
+      --cor-cinza-claro: #f8f9fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--cor-fundo);
+      color: var(--cor-texto);
+      font-family: Arial, sans-serif;
+    }
+
+
+    h1 {
+      margin: 0;
+      padding: 15px 0;
+      color: var(--cor-texto);
+      font-size: 1.6em;
+    }
+
+    .header-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: var(--cor-fundo);
+      border-bottom: 1px solid #ccc;
+    }
+
+    .logo-area {
+      flex: 1;
+    }
+
+    .titulo-area {
+      flex: 1;
+      text-align: center;
+    }
+
+    .espaco-direito {
+      flex: 1;
+    }
+
+    .logo-area img {
+      height: 50px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+
+    .top-bar {
+      background: var(--cor-fundo);
+    }
+
+    .botoes-acoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 20px 0;
+    }
+
+    .botoes-acoes button {
+      background: var(--cor-botao);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.9em;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 20px;
+      justify-content: space-between;
+      background: var(--cor-cinza-claro);
+      border-radius: 8px;
+    }
+
+    .filtros label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9em;
+  min-width: 150px;
+  flex: 1;
+  font-weight: bold;
+}
+#filtroStatus {
+  margin-left: 15px;
+}
+
+
+    .filtros input,
+    .filtros select {
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+
+    #btnFiltrar {
+      padding: 10px 16px;
+      background: var(--cor-botao);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      align-self: flex-end;
+      height: 42px;
+    }
+
+    .btn-massa {
+      background: white;
+      color: black;
+      border: 2px solid var(--cor-botao);
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tabela-container {
+      max-width: 98%;
+      margin: 0 auto 20px;
+      background: white;
+      border-radius: 8px;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: calc(100vh - 260px); /* AJUSTADO AQUI */
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95em;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: var(--cor-botao);
+      color: white;
+      z-index: 10;
+    }
+
+    tbody tr:nth-child(even) { background: #f2f2f2; }
+    tbody tr:nth-child(odd) { background: #ffffff; }
+    tbody tr { border-bottom: 1px solid #ccc; }
+
+    .acoes button {
+      margin: 2px 4px;
+      padding: 6px 10px;
+      font-size: 0.85em;
+      border: none;
+      background: #6c757d;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .status-pendente {
+      background: #fff3cd;
+      color: #856404;
+      font-weight: bold;
+    }
+
+    #modalAgrupar .box,
+    #modalAgruparWhatsApp .box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    #modalAgrupar,
+    #modalAgruparWhatsApp {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+   @media (max-width: 768px) {
+  body {
+    font-size: 0.95em;
+  }
+
+  .header-flex {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .logo-area, .espaco-direito {
+    display: none;
+  }
+
+  .titulo-area {
+    text-align: center;
+  }
+
+  .botoes-acoes {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .filtros {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .filtros label {
+    width: 100%;
+    min-width: unset;
+  }
+
+  #btnFiltrar, .btn-massa {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .tabela-container {
+    max-height: none;
+    overflow-x: scroll;
+    padding-bottom: 100px;
+  }
+
+  table {
+    font-size: 0.85em;
+  }
+
+  .acoes button {
+    font-size: 0.75em;
+    padding: 4px 6px;
+  }
+}
+
+
+    table th:nth-child(2),
+    table td:nth-child(2) {
+      width: 300px !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      word-wrap: break-word !important;
+      white-space: normal !important;
+    }
+    @media (max-width: 768px) {
+  body {
+    overflow: auto !important;
+  }
+}
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- ✅ Cabeçalho com logo e título centralizado -->
+  <div class="header-flex">
+    <div class="logo-area">
+      <img src="https://static.wixstatic.com/media/d830b0_8cec50a98bbf4775814dbfa5386585e8~mv2.png" alt="Logo" />
+    </div>
+    <div class="titulo-area">
+      <h1>Painel de Requisições Mercatto Delícia</h1>
+    </div>
+    <div class="espaco-direito"></div>
+  </div>
+
+  <div class="top-bar">
+    <div class="botoes-acoes">
+      <button onclick="abrirModalAgrupar('pdf')">📚 PDF</button>
+      <button onclick="abrirModalAgruparWhatsApp()">📱 WhatsApp</button>
+      <button onclick="abrirModalAgrupar('print')">🖨️ Imprimir</button>
+    </div>
+    <div class="filtros">
+      <label>Data de:<input type="date" id="filtroDataInicio"></label>
+      <label>Hora Inicial:<input type="time" id="filtroHoraInicio"></label>
+      <label>Data até:<input type="date" id="filtroDataFim"></label>
+      <label>Hora Final:<input type="time" id="filtroHoraFim"></label>
+      <label>Solicitante:<select id="filtroSolicitante"><option value="">Todos</option></select></label>
+      <label>Setor:<select id="filtroSetor"><option value="">Todos</option></select></label>
+      <label>Palavra-chave:<input type="text" id="filtroPalavra" placeholder="Buscar item ou observação"></label>
+      <button id="btnFiltrar" onclick="filtrar()">🔍 Filtrar</button>
+      <button onclick="abrirCarrinho()" style="margin-top: 10px; background: none; border: none; font-size: 1.8em; cursor: pointer;" title="Ver carrinho">
+  🛒
+</button>
+
+
+</div>
+  <div style="margin-left: 20px; display: inline-block;">
+  <label style="font-weight: bold; font-size: 0.9em;">
+    Status:
+    <select id="filtroStatus" onchange="filtrar()" style="padding: 10px; font-size: 1em; border-radius: 6px; border: 1px solid #ccc;">
+      <option value="">TODOS</option>
+     <option value="PENDENTE" selected>PENDENTE</option>
+      <option value="Concluir">CONCLUIR</option>
+      <option value="Negar">NEGADOS</option>
+      <option value="Comprar">COMPRAR</option>
+    </select>
+  </label>
+</div>
+
+  </label>
+ <button onclick="concluirEmMassa()" style="margin: 10px; padding: 8px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+  ✅ Conclusão em Massa
+</button>
+
+  </div>
+
+  <div class="tabela-container">
+    <table id="tabelaExport">
+      <thead>
+        <tr>
+          <th>Data e Hora</th><th>Item</th><th>Qtd</th><th>Unidade</th><th>Setor</th><th>Solicitante</th><th>Observações</th><th>Status</th><th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaRequisicoes"></tbody>
+    </table>
+  </div>
+<div id="modalCarrinho" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:1000;">
+<div style="background:#fff; width: 90vw; max-width: 1200px; max-height:90vh; overflow:auto; padding:20px; border-radius:8px;">
+    <h3>🛒 Itens no Carrinho</h3>
+   <table style="width:100%; border-collapse:collapse; text-align: left;">
+      <thead>
+        <tr style="background:#007bff; color:white;">
+          <th style="padding:8px; border:1px solid #ccc;">Item</th>
+          <th style="padding:8px; border:1px solid #ccc;">Qtd</th>
+          <th style="padding:8px; border:1px solid #ccc;">Unidade</th>
+          <th style="padding:8px; border:1px solid #ccc;">Setor</th>
+          <th style="padding:8px; border:1px solid #ccc;">Solicitante</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaCarrinhoModal"></tbody>
+    </table>
+    <br>
+    <button onclick="enviarCarrinhoWhatsApp()" style="padding:10px 20px; background:#25d366; color:white; border:none; border-radius:6px; cursor:pointer;">
+      📲 Enviar via WhatsApp
+    </button>
+    <button onclick="fecharCarrinho()" style="margin-left:10px; padding:10px 20px; background:#ccc; border:none; border-radius:6px; cursor:pointer;">Fechar</button>
+  </div>
+</div>
+
+  <div id="modalAgrupar">
+    <div class="box">
+      <h3>Como deseja agrupar?</h3>
+      <select id="seletorAgrupamento">
+  <option value="setor">Setor</option>
+  <option value="solicitante">Solicitante</option>
+  <option value="status">Status</option>
+</select>
+      <button onclick="confirmarAgrupamento()">OK</button>
+      <button onclick="document.getElementById('modalAgrupar').style.display='none'">Cancelar</button>
+    </div>
+  </div>
+  <div id="modalAgruparWhatsApp" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:999;">
+  <div class="box" style="background:#fff; padding:20px; border-radius:10px; width:300px; text-align:center;">
+    <h3>Como deseja agrupar no WhatsApp?</h3>
+    <select id="seletorAgrupamentoWhatsApp">
+      <option value="setor">Setor</option>
+      <option value="solicitante">Solicitante</option>
+      <option value="status">Status</option>
+    </select>
+    <button onclick="confirmarAgrupamentoWhatsApp()">Enviar</button>
+    <button onclick="document.getElementById('modalAgruparWhatsApp').style.display='none'">Cancelar</button>
+  </div>
+</div>
+
+
+
+
+
+  <script>
+
+const carrinhoSalvo = localStorage.getItem("carrinhoCompras");
+if (carrinhoSalvo) {
+  carrinhoCompras = JSON.parse(carrinhoSalvo);
+}
+
+  let requisicoes = [];
+  let listaFiltrada = [];
+
+  async function carregarDados() {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbzjVWXyGuwLDEfqNwgJppU2Yvo3_r_L7wbD1-AXfd3lztOUlq5zbKTQ0QCP7IknVae4TA/exec');
+    const dados = await res.json();
+
+    requisicoes = dados
+      .map((l, idx) => ({
+        linha: l.map(c => (c || '').toString().trim()),
+        idx
+      }))
+      .sort((a, b) => new Date(a.linha[0]) - new Date(b.linha[0]));
+
+    listaFiltrada = [...requisicoes];
+    renderizarTabela(listaFiltrada);
+    popularFiltros();
+  }
+
+  function renderizarTabela(lista) {
+    const tabela = document.getElementById('tabelaRequisicoes');
+    tabela.innerHTML = '';
+    lista.forEach(({ linha, idx }) => {
+      const tr = document.createElement('tr');
+      const novaOrdem = [0, 1, 3, 2, 4, 5, 6, 7];
+      novaOrdem.forEach(i => {
+        const td = document.createElement('td');
+        let valor = linha[i];
+        if (i === 7 && valor.toLowerCase() === "processando") valor = "PENDENTE";
+
+        td.innerHTML = i === 0
+          ? new Date(linha[i]).toLocaleString('pt-BR')
+          : i === 1
+            ? `<strong>${linha[i]}</strong>`
+            : valor;
+
+        tr.appendChild(td);
+      });
+
+      const tdAcoes = document.createElement('td');
+      tdAcoes.className = 'acoes';
+      ['Concluir', 'Comprar', 'Negar'].forEach(acao => {
+        const btn = document.createElement('button');
+        btn.textContent = acao;
+        btn.onclick = () => atualizarStatus(idx, acao);
+        tdAcoes.appendChild(btn);
+      });
+
+      tr.appendChild(tdAcoes);
+      tabela.appendChild(tr);
+    });
+  }
+
+  function filtrar() {
+    const status = document.getElementById('filtroStatus').value.toLowerCase();
+    const inicioData = document.getElementById('filtroDataInicio').value;
+    const fimData = document.getElementById('filtroDataFim').value;
+    const inicioHora = document.getElementById('filtroHoraInicio').value;
+    const fimHora = document.getElementById('filtroHoraFim').value;
+    const solicitante = document.getElementById('filtroSolicitante').value.toLowerCase();
+    const setor = document.getElementById('filtroSetor').value.toLowerCase();
+    const palavra = document.getElementById('filtroPalavra').value.toLowerCase();
+
+    listaFiltrada = requisicoes
+      .filter(({ linha }) => {
+        const dataHora = new Date(linha[0]);
+        if (inicioData) {
+          const dataInicio = new Date(`${inicioData}T${inicioHora || '00:00'}`);
+          if (dataHora < dataInicio) return false;
+        }
+        if (fimData) {
+          const dataFim = new Date(`${fimData}T${fimHora || '23:59'}`);
+          if (dataHora > dataFim) return false;
+        }
+        if (status && status !== '') {
+          const statusAtual = linha[7].toLowerCase() === "processando" ? "pendente" : linha[7].toLowerCase();
+          if (statusAtual !== status) return false;
+        }
+        if (solicitante && !linha[5].toLowerCase().includes(solicitante)) return false;
+        if (setor && !linha[4].toLowerCase().includes(setor)) return false;
+        if (palavra) {
+          const item = linha[1].toLowerCase();
+          const obs = (linha[6] || '').toLowerCase();
+          if (!item.includes(palavra) && !obs.includes(palavra)) return false;
+        }
+        return true;
+      });
+
+    renderizarTabela(listaFiltrada);
+  }
+
+  function popularFiltros() {
+    const solicitantes = new Set();
+    const setores = new Set();
+    requisicoes.forEach(({ linha }) => {
+      solicitantes.add(linha[5]);
+      setores.add(linha[4]);
+    });
+
+    const solicitanteSelect = document.getElementById('filtroSolicitante');
+    const setorSelect = document.getElementById('filtroSetor');
+
+    solicitantes.forEach(nome => {
+      const option = document.createElement('option');
+      option.value = nome;
+      option.textContent = nome;
+      solicitanteSelect.appendChild(option);
+    });
+
+    setores.forEach(nome => {
+      const option = document.createElement('option');
+      option.value = nome;
+      option.textContent = nome;
+      setorSelect.appendChild(option);
+    });
+  }
+
+  function agruparPor(campo, lista = requisicoes) {
+    const agrupado = {};
+    lista.forEach(({ linha }) => {
+      let chave = '';
+      if (campo === 'setor') chave = linha[4];
+      else if (campo === 'solicitante') chave = linha[5];
+      else if (campo === 'status') {
+        const raw = linha[7].toLowerCase();
+        chave = raw === "processando" ? "PENDENTE" : raw.toUpperCase();
+      } else chave = 'Outro';
+
+      if (!agrupado[chave]) agrupado[chave] = [];
+      agrupado[chave].push(linha);
+    });
+    return agrupado;
+  }
+
+  function gerarHTMLAgrupado(agrupado, opcao) {
+    const logoURL = "https://static.wixstatic.com/media/d830b0_8cec50a98bbf4775814dbfa5386585e8~mv2.png";
+    let html = `
+      <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+        <img src="${logoURL}" style="height:50px; max-width:150px;">
+        <h2 style="margin:0;">Requisições agrupadas por ${opcao}</h2>
+      </div>
+    `;
+    html += '<table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse:collapse">';
+    html += '<thead><tr style="background:#00796b; color:white"><th>Data e Hora</th><th>Item</th><th>Qtd</th><th>Unidade</th><th>Setor</th><th>Solicitante</th><th>Observações</th><th>Status</th></tr></thead>';
+
+    for (const grupo in agrupado) {
+      html += `<tr><td colspan="8" style="font-weight:bold; background:#eee">${grupo}</td></tr>`;
+      agrupado[grupo].forEach(l => {
+        const data = new Date(l[0]).toLocaleString('pt-BR');
+        html += `<tr>
+          <td>${data}</td>
+          <td><strong>${l[1]}</strong></td>
+          <td>${l[3]}</td>
+          <td>${l[2]}</td>
+          <td>${l[4]}</td>
+          <td>${l[5]}</td>
+          <td>${l[6]}</td>
+          <td>${l[7]}</td>
+        </tr>`;
+      });
+    }
+
+    html += '</table>';
+    return html;
+  }
+
+  function gerarPDFAgrupado(opcao) {
+    const agrupado = agruparPor(opcao, listaFiltrada.length ? listaFiltrada.map(x => ({ linha: x.linha })) : requisicoes);
+    const html = gerarHTMLAgrupado(agrupado, opcao);
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    html2pdf().from(container).set({ filename: 'requisicoes_agrupadas.pdf' }).save();
+  }
+
+  function imprimirAgrupado(opcao) {
+    const agrupado = agruparPor(opcao, listaFiltrada.length ? listaFiltrada.map(x => ({ linha: x.linha })) : requisicoes);
+    const html = gerarHTMLAgrupado(agrupado, opcao);
+    const janela = window.open('', '_blank');
+    janela.document.write(`<html><head><title>Impressão</title></head><body>${html}</body></html>`);
+    janela.document.close();
+    janela.print();
+  }
+
+  function enviarWhatsApp(criterio = 'setor') {
+    const hoje = new Date();
+    const dataFormatada = hoje.toLocaleDateString('pt-BR');
+    const titulo = `**COMPRAS DELÍCIA GOURMET - ${dataFormatada}**\n\n`;
+
+    const agrupado = {};
+    const fonte = listaFiltrada.length ? listaFiltrada : requisicoes;
+
+    fonte.forEach(({ linha }) => {
+      let chave = '';
+      if (criterio === 'setor') chave = linha[4];
+      else if (criterio === 'solicitante') chave = linha[5];
+      else if (criterio === 'status') {
+        const raw = linha[7].toLowerCase();
+        chave = raw === "processando" ? "PENDENTE" : raw.toUpperCase();
+      } else chave = 'Outro';
+
+      const item = linha[1];
+      const unidade = linha[2];
+      const quantidade = linha[3];
+
+      if (!agrupado[chave]) agrupado[chave] = [];
+      agrupado[chave].push({ item, quantidade, unidade });
+    });
+
+    let mensagem = titulo;
+    for (const grupo in agrupado) {
+      mensagem += `🛒 *${grupo}*\n`;
+      agrupado[grupo].forEach(({ item, quantidade, unidade }) => {
+        mensagem += `- ${item} — ${quantidade} ${unidade}\n`;
+      });
+      mensagem += `\n`;
+    }
+
+    const link = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+    window.open(link, '_blank');
+  }
+
+  function abrirModalAgrupar(origem) {
+    const modal = document.getElementById("modalAgrupar");
+    modal.dataset.origem = origem;
+    modal.style.display = "flex";
+  }
+
+  function confirmarAgrupamento() {
+    const opcao = document.getElementById("seletorAgrupamento").value;
+    const origem = document.getElementById("modalAgrupar").dataset.origem;
+    document.getElementById("modalAgrupar").style.display = "none";
+    if (origem === "pdf") gerarPDFAgrupado(opcao);
+    else imprimirAgrupado(opcao);
+  }
+
+  function abrirModalAgruparWhatsApp() {
+    document.getElementById("modalAgruparWhatsApp").style.display = "flex";
+  }
+
+  function confirmarAgrupamentoWhatsApp() {
+    const criterio = document.getElementById("seletorAgrupamentoWhatsApp").value;
+    document.getElementById("modalAgruparWhatsApp").style.display = "none";
+    enviarWhatsApp(criterio);
+  }
+
+
+function atualizarStatus(linhaIndex, novoStatus) {
+  const dadosOriginais = requisicoes[linhaIndex].linha;
+
+  const payload = {
+    dataHoraOriginal: dadosOriginais[0],
+    item: dadosOriginais[1],
+    unidade: dadosOriginais[2],
+    quantidade: dadosOriginais[3],
+    setor: dadosOriginais[4],
+    solicitante: dadosOriginais[5],
+    observacoes: dadosOriginais[6],
+    statusOriginal: dadosOriginais[7],
+    novoStatus: novoStatus
+  };
+
+  if (novoStatus === 'Comprar') {
+    carrinhoCompras.push(payload);
+    atualizarCarrinhoVisual();
+    const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
+    btns.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = '🛒 No carrinho';
+    });
+  } else {
+    const urlStatus = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
+
+    fetch(urlStatus, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.text())
+    .then(msg => {
+      const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (novoStatus === 'Concluir') btn.textContent = '✔️ Concluído';
+        else if (novoStatus === 'Negar') btn.textContent = '❌ Negado';
+      });
+    })
+    .catch(err => alert("Erro ao registrar: " + err));
+  }
+}
+
+    function concluirEmMassa() {
+  const pendentes = listaFiltrada
+    .map((item, idx) => ({ item, idx }))
+    .filter(({ item }) => {
+      const status = item.linha[7].toLowerCase();
+      return status === "processando" || status === "pendente";
+    });
+
+  if (pendentes.length === 0) {
+    alert("Nenhuma requisição com status PENDENTE encontrada.");
+    return;
+  }
+
+  const confirmacao = confirm(`Deseja marcar ${pendentes.length} requisições como CONCLUÍDAS?`);
+  if (!confirmacao) return;
+
+  pendentes.forEach(({ item, idx }) => {
+    const dadosOriginais = item.linha;
+
+    const payload = {
+      dataHoraOriginal: dadosOriginais[0],
+      item: dadosOriginais[1],
+      unidade: dadosOriginais[2],
+      quantidade: dadosOriginais[3],
+      setor: dadosOriginais[4],
+      solicitante: dadosOriginais[5],
+      observacoes: dadosOriginais[6],
+      statusOriginal: dadosOriginais[7],
+      novoStatus: "Concluir"
+    };
+
+const urlStatus = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
+const urlCompras = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
+
+const urlDestino = novoStatus === 'Comprar' ? urlCompras : urlStatus;
+
+fetch(urlDestino, {
+
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(() => {
+      const btns = document.querySelectorAll(`tr:nth-child(${idx + 1}) .acoes button`);
+      btns.forEach(btn => {
+        btn.disabled = true;
+        btn.textContent = '✔️ Concluído';
+      });
+    })
+    .catch(err => console.error("Erro em massa:", err));
+  });
+}
+function atualizarCarrinhoVisual() {
+  const tbody = document.getElementById("tabelaCarrinhoModal");
+  tbody.innerHTML = "";
+
+  carrinhoCompras.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+  <td style="border:1px solid #ccc; padding:6px;">${item.item}</td>
+  <td style="border:1px solid #ccc; padding:6px;">
+    <input type="number" value="${item.quantidade}" min="1" style="width:60px;" onchange="carrinhoCompras[${index}].quantidade = this.value">
+  </td>
+  <td style="border:1px solid #ccc; padding:6px;">
+    <select onchange="carrinhoCompras[${index}].unidade = this.value">
+      <option value="UN." ${item.unidade === 'UN.' ? 'selected' : ''}>UN.</option>
+      <option value="CX" ${item.unidade === 'CX' ? 'selected' : ''}>CX</option>
+      <option value="KG" ${item.unidade === 'KG' ? 'selected' : ''}>KG</option>
+      <option value="PC" ${item.unidade === 'PC' ? 'selected' : ''}>PC</option>
+    </select>
+  </td>
+  <td style="border:1px solid #ccc; padding:6px;">${item.setor}</td>
+  <td style="border:1px solid #ccc; padding:6px;">${item.solicitante}</td>
+`;
+
+    tbody.appendChild(tr);
+  });
+}
+function abrirCarrinho() {
+  atualizarCarrinhoModal();
+  document.getElementById('modalCarrinho').style.display = 'flex';
+
+}
+
+function fecharCarrinho() {
+  document.getElementById('modalCarrinho').style.display = 'none';
+
+}
+
+function atualizarCarrinhoModal() {
+  const tbody = document.getElementById("tabelaCarrinhoModal");
+  tbody.innerHTML = "";
+
+  carrinhoCompras.forEach((item, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="border:1px solid #ccc; padding:6px;">${item.item}</td>
+      <td style="border:1px solid #ccc; padding:6px;">
+        <input type="number" value="${item.quantidade}" min="1" style="width:50px" onchange="editarQuantidade(${index}, this.value)">
+      </td>
+      <td style="border:1px solid #ccc; padding:6px;">
+        <input type="text" value="${item.unidade}" style="width:50px" onchange="editarUnidade(${index}, this.value)">
+      </td>
+      <td style="border:1px solid #ccc; padding:6px;">${item.setor}</td>
+      <td style="border:1px solid #ccc; padding:6px;">${item.solicitante}</td>
+      <td style="border:1px solid #ccc; padding:6px; text-align:center;">
+        <button onclick="removerItemCarrinho(${index})" style="padding:4px 8px; background:red; color:white; border:none; border-radius:4px;">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  localStorage.setItem("carrinhoCompras", JSON.stringify(carrinhoCompras));
+}
+
+
+function enviarCarrinhoWhatsApp() {
+  if (carrinhoCompras.length === 0) {
+    alert("O carrinho está vazio.");
+    localStorage.removeItem("carrinhoCompras");
+
+    return;
+  }
+
+  let mensagem = `🛒 *Itens para Compra:*\n\n`;
+  carrinhoCompras.forEach(item => {
+    mensagem += `• ${item.item} — ${item.quantidade} ${item.unidade} (${item.setor})\n`;
+  });
+
+  const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+  window.open(url, '_blank');
+}
+
+function removerItemCarrinho(index) {
+  carrinhoCompras.splice(index, 1);
+  atualizarCarrinhoModal();
+}
+
+function editarQuantidade(index, novaQtd) {
+  carrinhoCompras[index].quantidade = novaQtd;
+  localStorage.setItem("carrinhoCompras", JSON.stringify(carrinhoCompras));
+}
+
+function editarUnidade(index, novaUnidade) {
+  carrinhoCompras[index].unidade = novaUnidade;
+  localStorage.setItem("carrinhoCompras", JSON.stringify(carrinhoCompras));
+}
+
+
+
+  carregarDados();
+</script>
+
+
+</body>
+</html>
