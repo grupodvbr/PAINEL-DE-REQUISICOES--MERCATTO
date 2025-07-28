@@ -412,7 +412,7 @@ if (carrinhoSalvo) {
   let listaFiltrada = [];
 
   async function carregarDados() {
-    const res = await fetch('https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec');
+    const res = await fetch('https://script.google.com/macros/s/AKfycbx6NYl2ruWFx0_Hq9HYpKK1bBLonpcDlAGz_9u8vUllm22Bfo1iQ5wlCxFvQOigM07c/exec');
     const dados = await res.json();
 
     requisicoes = dados
@@ -678,7 +678,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
       btn.textContent = '🛒 No carrinho';
     });
   } else {
-    const urlStatus = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
+    const urlStatus = 'https://script.google.com/macros/s/AKfycbx6NYl2ruWFx0_Hq9HYpKK1bBLonpcDlAGz_9u8vUllm22Bfo1iQ5wlCxFvQOigM07c/exec';
 
     fetch(urlStatus, {
       method: 'POST',
@@ -729,8 +729,8 @@ function atualizarStatus(linhaIndex, novoStatus) {
       novoStatus: "Concluir"
     };
 
-const urlStatus = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
-const urlCompras = 'https://script.google.com/macros/s/AKfycbxk5CVDcrdUj546keN0l7p5EKNvSATgQaOuW5D4PdxmN2CESNFrLABOWCMrattDYl1qjQ/exec';
+const urlStatus = 'https://script.google.com/macros/s/AKfycbx6NYl2ruWFx0_Hq9HYpKK1bBLonpcDlAGz_9u8vUllm22Bfo1iQ5wlCxFvQOigM07c/exec';
+const urlCompras = 'https://script.google.com/macros/s/AKfycbx6NYl2ruWFx0_Hq9HYpKK1bBLonpcDlAGz_9u8vUllm22Bfo1iQ5wlCxFvQOigM07c/exec';
 
 const urlDestino = novoStatus === 'Comprar' ? urlCompras : urlStatus;
 
