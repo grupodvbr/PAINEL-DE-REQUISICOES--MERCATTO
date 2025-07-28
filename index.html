@@ -483,7 +483,7 @@ if (carrinhoSalvo) {
           if (dataHora > dataFim) return false;
         }
         if (status && status !== '') {
-          const statusAtual = linha[7].toLowerCase() === "processando" ? "pendente" : linha[7].toLowerCase();
+          const statusAtual = linha[7].toLowerCase() === "Pendente" ? "pendente" : linha[7].toLowerCase();
           if (statusAtual !== status) return false;
         }
         if (solicitante && !linha[5].toLowerCase().includes(solicitante)) return false;
@@ -533,7 +533,7 @@ if (carrinhoSalvo) {
       else if (campo === 'solicitante') chave = linha[5];
       else if (campo === 'status') {
         const raw = linha[7].toLowerCase();
-        chave = raw === "processando" ? "PENDENTE" : raw.toUpperCase();
+        chave = raw === "Pendente" ? "PENDENTE" : raw.toUpperCase();
       } else chave = 'Outro';
 
       if (!agrupado[chave]) agrupado[chave] = [];
@@ -605,7 +605,7 @@ if (carrinhoSalvo) {
       else if (criterio === 'solicitante') chave = linha[5];
       else if (criterio === 'status') {
         const raw = linha[7].toLowerCase();
-        chave = raw === "processando" ? "PENDENTE" : raw.toUpperCase();
+        chave = raw === "Pendente" ? "PENDENTE" : raw.toUpperCase();
       } else chave = 'Outro';
 
       const item = linha[1];
@@ -703,7 +703,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
     .map((item, idx) => ({ item, idx }))
     .filter(({ item }) => {
       const status = item.linha[7].toLowerCase();
-      return status === "processando" || status === "pendente";
+      return status === "Pendente" || status === "pendente";
     });
 
   if (pendentes.length === 0) {
