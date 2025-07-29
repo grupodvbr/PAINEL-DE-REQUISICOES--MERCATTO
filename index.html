@@ -29,7 +29,6 @@
       font-family: Arial, sans-serif;
     }
 
-
     h1 {
       margin: 0;
       padding: 15px 0;
@@ -54,10 +53,6 @@
       flex: 1;
       text-align: center;
     }
-.btn-verde {
-  background-color: #28a745 !important;
-  color: white !important;
-}
 
     .espaco-direito {
       flex: 1;
@@ -67,10 +62,6 @@
       height: 50px;
       max-width: 150px;
       object-fit: contain;
-    }
-
-    .top-bar {
-      background: var(--cor-fundo);
     }
 
     .botoes-acoes {
@@ -90,6 +81,11 @@
       cursor: pointer;
     }
 
+    .btn-verde {
+      background-color: #28a745 !important;
+      color: white !important;
+    }
+
     .filtros {
       display: flex;
       flex-wrap: wrap;
@@ -101,17 +97,13 @@
     }
 
     .filtros label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.9em;
-  min-width: 150px;
-  flex: 1;
-  font-weight: bold;
-}
-#filtroStatus {
-  margin-left: 15px;
-}
-
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9em;
+      min-width: 150px;
+      flex: 1;
+      font-weight: bold;
+    }
 
     .filtros input,
     .filtros select {
@@ -153,7 +145,7 @@
       border-radius: 8px;
       overflow-x: auto;
       overflow-y: auto;
-      max-height: calc(100vh - 260px); /* AJUSTADO AQUI */
+      max-height: calc(100vh - 260px);
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
 
@@ -192,84 +184,63 @@
       font-weight: bold;
     }
 
-    #modalAgrupar .box,
-    #modalAgruparWhatsApp .box {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
-
-    #modalAgrupar,
-    #modalAgruparWhatsApp {
+    #modalCarrinho {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.4);
       justify-content: center;
       align-items: center;
-      z-index: 999;
+      z-index: 1000;
     }
 
-   @media (max-width: 768px) {
-  body {
-    font-size: 0.95em;
-  }
+    @media (max-width: 768px) {
+      body { font-size: 0.95em; overflow: auto !important; }
 
-  .header-flex {
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    text-align: center;
-  }
+      .header-flex {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        text-align: center;
+      }
 
-  .logo-area, .espaco-direito {
-    display: none;
-  }
+      .logo-area, .espaco-direito { display: none; }
 
-  .titulo-area {
-    text-align: center;
-  }
+      .botoes-acoes {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+      }
 
-  .botoes-acoes {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 10px;
-  }
+      .filtros {
+        flex-direction: column;
+        padding: 10px;
+      }
 
-  .filtros {
-    flex-direction: column;
-    padding: 10px;
-  }
+      .filtros label {
+        width: 100%;
+        min-width: unset;
+      }
 
-  .filtros label {
-    width: 100%;
-    min-width: unset;
-  }
+      #btnFiltrar, .btn-massa {
+        width: 100%;
+        margin-top: 10px;
+      }
 
-  #btnFiltrar, .btn-massa {
-    width: 100%;
-    margin-top: 10px;
-  }
+      .tabela-container {
+        max-height: none;
+        overflow-x: scroll;
+        padding-bottom: 100px;
+      }
 
-  .tabela-container {
-    max-height: none;
-    overflow-x: scroll;
-    padding-bottom: 100px;
-  }
+      table { font-size: 0.85em; }
 
-  table {
-    font-size: 0.85em;
-  }
-
-  .acoes button {
-    font-size: 0.75em;
-    padding: 4px 6px;
-  }
-}
-
+      .acoes button {
+        font-size: 0.75em;
+        padding: 4px 6px;
+      }
+    }
 
     table th:nth-child(2),
     table td:nth-child(2) {
@@ -279,19 +250,12 @@
       word-wrap: break-word !important;
       white-space: normal !important;
     }
-    @media (max-width: 768px) {
-  body {
-    overflow: auto !important;
-  }
-}
-
   </style>
-
 </head>
 
 <body>
 
-  <!-- ✅ Cabeçalho com logo e título centralizado -->
+  <!-- ✅ Cabeçalho -->
   <div class="header-flex">
     <div class="logo-area">
       <img src="https://static.wixstatic.com/media/d830b0_8cec50a98bbf4775814dbfa5386585e8~mv2.png" alt="Logo" />
@@ -302,12 +266,14 @@
     <div class="espaco-direito"></div>
   </div>
 
+  <!-- ✅ Botões e Filtros -->
   <div class="top-bar">
     <div class="botoes-acoes">
       <button onclick="abrirModalAgrupar('pdf')">📚 PDF</button>
       <button onclick="abrirModalAgruparWhatsApp()">📱 WhatsApp</button>
       <button onclick="abrirModalAgrupar('print')">🖨️ Imprimir</button>
     </div>
+
     <div class="filtros">
       <label>Data de:<input type="date" id="filtroDataInicio"></label>
       <label>Hora Inicial:<input type="time" id="filtroHoraInicio"></label>
@@ -317,32 +283,28 @@
       <label>Setor:<select id="filtroSetor"><option value="">Todos</option></select></label>
       <label>Palavra-chave:<input type="text" id="filtroPalavra" placeholder="Buscar item ou observação"></label>
       <button id="btnFiltrar" onclick="filtrar()">🔍 Filtrar</button>
-      <button onclick="abrirCarrinho()" style="margin-top: 10px; background: none; border: none; font-size: 1.8em; cursor: pointer;" title="Ver carrinho">
-  🛒
-</button>
+      <button onclick="abrirCarrinho()" style="margin-top: 10px; background: none; border: none; font-size: 1.8em; cursor: pointer;" title="Ver carrinho">🛒</button>
+    </div>
 
+    <div style="margin-left: 20px; display: inline-block;">
+      <label style="font-weight: bold; font-size: 0.9em;">
+        Status:
+        <select id="filtroStatus" onchange="filtrar()" style="padding: 10px; font-size: 1em; border-radius: 6px; border: 1px solid #ccc;">
+          <option value="">TODOS</option>
+          <option value="PENDENTE" selected>PENDENTE</option>
+          <option value="Concluir">CONCLUIR</option>
+          <option value="Negar">NEGADOS</option>
+          <option value="Comprar">COMPRAR</option>
+        </select>
+      </label>
+    </div>
 
-</div>
-  <div style="margin-left: 20px; display: inline-block;">
-  <label style="font-weight: bold; font-size: 0.9em;">
-    Status:
-    <select id="filtroStatus" onchange="filtrar()" style="padding: 10px; font-size: 1em; border-radius: 6px; border: 1px solid #ccc;">
-      <option value="">TODOS</option>
-     <option value="PENDENTE" selected>PENDENTE</option>
-      <option value="Concluir">CONCLUIR</option>
-      <option value="Negar">NEGADOS</option>
-      <option value="Comprar">COMPRAR</option>
-    </select>
-  </label>
-</div>
-
-  </label>
- <button onclick="concluirEmMassa()" style="margin: 10px; padding: 8px 16px; background: #388e3c; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-  ✅ Conclusão em Massa
-</button>
-
+    <button onclick="concluirEmMassa()" class="btn-massa">
+      ✅ Conclusão em Massa
+    </button>
   </div>
 
+  <!-- ✅ Tabela de Requisições -->
   <div class="tabela-container">
     <table id="tabelaExport">
       <thead>
@@ -353,58 +315,14 @@
       <tbody id="tabelaRequisicoes"></tbody>
     </table>
   </div>
-<div id="modalCarrinho" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:1000;">
-<div style="background:#fff; width: 90vw; max-width: 1200px; max-height:90vh; overflow:auto; padding:20px; border-radius:8px;">
-    <h3>🛒 Itens no Carrinho</h3>
-   <table style="width:100%; border-collapse:collapse; text-align: left;">
-      <thead>
-        <tr style="background:#007bff; color:white;">
-          <th style="padding:8px; border:1px solid #ccc;">Item</th>
-          <th style="padding:8px; border:1px solid #ccc;">Qtd</th>
-          <th style="padding:8px; border:1px solid #ccc;">Unidade</th>
-          <th style="padding:8px; border:1px solid #ccc;">Setor</th>
-          <th style="padding:8px; border:1px solid #ccc;">Solicitante</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaCarrinhoModal"></tbody>
-    </table>
-    <br>
-    <button onclick="enviarCarrinhoWhatsApp()" style="padding:10px 20px; background:#25d366; color:white; border:none; border-radius:6px; cursor:pointer;">
-      📲 Enviar via WhatsApp
-    </button>
-    <button onclick="fecharCarrinho()" style="margin-left:10px; padding:10px 20px; background:#ccc; border:none; border-radius:6px; cursor:pointer;">Fechar</button>
-  </div>
-</div>
 
-  <div id="modalAgrupar">
-    <div class="box">
-      <h3>Como deseja agrupar?</h3>
-      <select id="seletorAgrupamento">
-  <option value="setor">Setor</option>
-  <option value="solicitante">Solicitante</option>
-  <option value="status">Status</option>
-</select>
-      <button onclick="confirmarAgrupamento()">OK</button>
-      <button onclick="document.getElementById('modalAgrupar').style.display='none'">Cancelar</button>
-    </div>
-  </div>
-  <div id="modalAgruparWhatsApp" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:999;">
-  <div class="box" style="background:#fff; padding:20px; border-radius:10px; width:300px; text-align:center;">
-    <h3>Como deseja agrupar no WhatsApp?</h3>
-    <select id="seletorAgrupamentoWhatsApp">
-      <option value="setor">Setor</option>
-      <option value="solicitante">Solicitante</option>
-      <option value="status">Status</option>
-    </select>
-    <button onclick="confirmarAgrupamentoWhatsApp()">Enviar</button>
-    <button onclick="document.getElementById('modalAgruparWhatsApp').style.display='none'">Cancelar</button>
-  </div>
-</div>
+  <!-- ✅ Modais -->
+  <div id="modalCarrinho"></div>
+  <div id="modalAgrupar"></div>
+  <div id="modalAgruparWhatsApp"></div>
 
-
-
-
-
+  <!-- ✅ Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
 
 const carrinhoSalvo = localStorage.getItem("carrinhoCompras");
