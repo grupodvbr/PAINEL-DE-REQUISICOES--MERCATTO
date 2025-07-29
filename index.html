@@ -54,6 +54,10 @@
       flex: 1;
       text-align: center;
     }
+.btn-verde {
+  background-color: #28a745 !important;
+  color: white !important;
+}
 
     .espaco-direito {
       flex: 1;
@@ -673,10 +677,16 @@ function atualizarStatus(linhaIndex, novoStatus) {
     carrinhoCompras.push(payload);
     atualizarCarrinhoVisual();
     const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
-    btns.forEach(btn => {
-      btn.disabled = true;
-      btn.textContent = '🛒 No carrinho';
-    });
+   btns.forEach(btn => {
+  if (btn.textContent === 'Comprar') {
+    btn.classList.add('btn-verde');
+    btn.innerHTML = '🛒 No carrinho';
+    btn.disabled = true;
+  } else {
+    btn.disabled = true;
+  }
+});
+
   } else {
     const urlStatus = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
 
