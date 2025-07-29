@@ -456,7 +456,7 @@ if (carrinhoSalvo) {
       ['Concluir', 'Comprar', 'Negar'].forEach(acao => {
         const btn = document.createElement('button');
         btn.textContent = acao;
-        btn.onclick = () => atualizarStatus(idx, acao);
+        btn.onclick = (event) => atualizarStatus(idx, acao, event.target);
         tdAcoes.appendChild(btn);
       });
 
@@ -658,7 +658,7 @@ if (carrinhoSalvo) {
   }
 
 
-function atualizarStatus(linhaIndex, novoStatus) {
+function atualizarStatus(linhaIndex, novoStatus, botaoClicado) {
   const dadosOriginais = requisicoes[linhaIndex].linha;
 
   const payload = {
@@ -676,17 +676,11 @@ function atualizarStatus(linhaIndex, novoStatus) {
   if (novoStatus === 'Comprar') {
     carrinhoCompras.push(payload);
     atualizarCarrinhoVisual();
-    const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
-   btns.forEach(btn => {
- if (btn.textContent.trim().toLowerCase() === 'comprar') {
-    btn.classList.add('btn-verde');
-    btn.innerHTML = '🛒 No carrinho';
-    btn.disabled = true;
-  } else {
-    btn.disabled = true;
-  }
-});
 
+    // ✅ Atualiza somente o botão clicado
+    botaoClicado.textContent = '🛒 No carrinho';
+    botaoClicado.classList.add('btn-verde');
+    botaoClicado.disabled = true;
   } else {
     const urlStatus = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
 
@@ -695,14 +689,10 @@ function atualizarStatus(linhaIndex, novoStatus) {
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     })
-    .then(res => res.text())
-    .then(msg => {
-      const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
-      btns.forEach(btn => {
-        btn.disabled = true;
-        if (novoStatus === 'Concluir') btn.textContent = '✔️ Concluído';
-        else if (novoStatus === 'Negar') btn.textContent = '❌ Negado';
-      });
+    .then(() => {
+      botaoClicado.disabled = true;
+      if (novoStatus === 'Concluir') botaoClicado.textContent = '✔️ Concluído';
+      else if (novoStatus === 'Negar') botaoClicado.textContent = '❌ Negado';
     })
     .catch(err => alert("Erro ao registrar: " + err));
   }
