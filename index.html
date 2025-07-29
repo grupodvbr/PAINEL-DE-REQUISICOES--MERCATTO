@@ -678,7 +678,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
     atualizarCarrinhoVisual();
     const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
    btns.forEach(btn => {
-  if (btn.textContent === 'Comprar') {
+ if (btn.textContent.trim().toLowerCase() === 'comprar') {
     btn.classList.add('btn-verde');
     btn.innerHTML = '🛒 No carrinho';
     btn.disabled = true;
