@@ -322,13 +322,13 @@
   <div style="margin-left: 20px; display: inline-block;">
   <label style="font-weight: bold; font-size: 0.9em;">
     Status:
-    <select id="filtroStatus" onchange="filtrar()" style="...">
-  <option value="">TODOS</option>
-<option value="pendente" selected>PENDENTE</option>
-<option value="concluir">CONCLUIR</option>
-<option value="negar">NEGADOS</option>
-<option value="comprar">COMPRAR</option>
-</select>
+    <select id="filtroStatus" onchange="filtrar()" style="padding: 10px; font-size: 1em; border-radius: 6px; border: 1px solid #ccc;">
+      <option value="">TODOS</option>
+     <option value="PENDENTE" selected>PENDENTE</option>
+      <option value="Concluir">CONCLUIR</option>
+      <option value="Negar">NEGADOS</option>
+      <option value="Comprar">COMPRAR</option>
+    </select>
   </label>
 </div>
 
@@ -402,7 +402,7 @@
 
 
   <script>
-let carrinhoCompras = [];
+
 const carrinhoSalvo = localStorage.getItem("carrinhoCompras");
 if (carrinhoSalvo) {
   carrinhoCompras = JSON.parse(carrinhoSalvo);
@@ -411,26 +411,21 @@ if (carrinhoSalvo) {
   let requisicoes = [];
   let listaFiltrada = [];
 
- async function carregarDados() {
-  try {
+  async function carregarDados() {
     const res = await fetch('https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec');
-    
-    if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
-    
     const dados = await res.json();
 
     requisicoes = dados
-      .map((l, idx) => ({ linha: l.map(c => (c || '').toString().trim()), idx }))
+      .map((l, idx) => ({
+        linha: l.map(c => (c || '').toString().trim()),
+        idx
+      }))
       .sort((a, b) => new Date(a.linha[0]) - new Date(b.linha[0]));
 
     listaFiltrada = [...requisicoes];
     renderizarTabela(listaFiltrada);
     popularFiltros();
-  } catch (erro) {
-    alert("Erro ao carregar dados: " + erro.message);
-    console.error("Erro ao carregar dados:", erro);
   }
-}
 
   function renderizarTabela(lista) {
     const tabela = document.getElementById('tabelaRequisicoes');
@@ -487,8 +482,10 @@ if (carrinhoSalvo) {
           const dataFim = new Date(`${fimData}T${fimHora || '23:59'}`);
           if (dataHora > dataFim) return false;
         }
-       if (status && linha[7]?.toLowerCase() !== status) return false;
-
+        if (status && status !== '') {
+          const statusAtual = linha[7].toLowerCase() === "Pendente" ? "pendente" : linha[7].toLowerCase();
+          if (statusAtual !== status) return false;
+        }
         if (solicitante && !linha[5].toLowerCase().includes(solicitante)) return false;
         if (setor && !linha[4].toLowerCase().includes(setor)) return false;
         if (palavra) {
@@ -512,8 +509,7 @@ if (carrinhoSalvo) {
 
     const solicitanteSelect = document.getElementById('filtroSolicitante');
     const setorSelect = document.getElementById('filtroSetor');
-    solicitanteSelect.innerHTML = '<option value="">Todos</option>';
-    setorSelect.innerHTML = '<option value="">Todos</option>';
+
     solicitantes.forEach(nome => {
       const option = document.createElement('option');
       option.value = nome;
@@ -673,38 +669,41 @@ function atualizarStatus(linhaIndex, novoStatus) {
     novoStatus: novoStatus
   };
 
- if (novoStatus === 'Comprar') {
-  carrinhoCompras.push(payload);
-  atualizarCarrinhoVisual();
+  if (novoStatus === 'Comprar') {
+    carrinhoCompras.push(payload);
+    atualizarCarrinhoVisual();
+    const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
+    btns.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = '🛒 No carrinho';
+    });
+  } else {
+    const urlStatus = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
 
-  // ✅ Envia para a planilha com status "No carrinho"
-  const urlStatus = 'https://script.google.com/macros/s/AKfycbxSQv5S4jDFXvWM1Z_xwFrVG9iYGZjQXqSOzeWfmk0MKjTkSCWGh5w2CTfXinxZocT8Hw/exec';
-
-  const payloadCarrinho = { ...payload, novoStatus: "No carrinho" };
-
-  fetch(urlStatus, {
-    method: 'POST',
-    body: JSON.stringify(payloadCarrinho),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(() => {
-  document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
-    btn.disabled = true;
-    btn.textContent = '🛒 No carrinho';
-  });
-  carregarDados(); // Atualiza a tabela depois de salvar
-})
-
-  .catch(err => alert("Erro ao registrar carrinho: " + err));
+    fetch(urlStatus, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.text())
+    .then(msg => {
+      const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (novoStatus === 'Concluir') btn.textContent = '✔️ Concluído';
+        else if (novoStatus === 'Negar') btn.textContent = '❌ Negado';
+      });
+    })
+    .catch(err => alert("Erro ao registrar: " + err));
+  }
 }
-
 
     function concluirEmMassa() {
   const pendentes = listaFiltrada
     .map((item, idx) => ({ item, idx }))
     .filter(({ item }) => {
       const status = item.linha[7].toLowerCase();
-      return status === "pendente";
+      return status === "Pendente" || status === "pendente";
     });
 
   if (pendentes.length === 0) {
@@ -730,8 +729,8 @@ function atualizarStatus(linhaIndex, novoStatus) {
       novoStatus: "Concluir"
     };
 
-const urlStatus = 'https://script.google.com/macros/s/AKfycbxSQv5S4jDFXvWM1Z_xwFrVG9iYGZjQXqSOzeWfmk0MKjTkSCWGh5w2CTfXinxZocT8Hw/exec';
-const urlCompras = 'https://script.google.com/macros/s/AKfycbxSQv5S4jDFXvWM1Z_xwFrVG9iYGZjQXqSOzeWfmk0MKjTkSCWGh5w2CTfXinxZocT8Hw/exec';
+const urlStatus = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
+const urlCompras = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
 
 const urlDestino = novoStatus === 'Comprar' ? urlCompras : urlStatus;
 
@@ -755,7 +754,7 @@ function atualizarCarrinhoVisual() {
   const tbody = document.getElementById("tabelaCarrinhoModal");
   tbody.innerHTML = "";
 
-  carrinhoCompras.forEach((item, index) => {
+  carrinhoCompras.forEach(item => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
   <td style="border:1px solid #ccc; padding:6px;">${item.item}</td>
