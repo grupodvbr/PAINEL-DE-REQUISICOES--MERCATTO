@@ -674,7 +674,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
   atualizarCarrinhoVisual();
 
   // ✅ Envia para a planilha com status "No carrinho"
-  const urlStatus = 'https://script.google.com/macros/s/AKfycbywqYAsUno_YJrLIH9a3vvwzklcLZy-n-QcTzbzIFORnwMdmIrLWQafQkmtA5FwXpf9VA/exec';
+  const urlStatus = 'https://script.google.com/macros/s/AKfycbydxklfPqLmARJQfjEJ2VYXwD-0VeWYmBu4gOt3hmu-4gLakeiTSnuIiT7HuwOD9I9SCg/exec';
 
   const payloadCarrinho = { ...payload, novoStatus: "No carrinho" };
 
@@ -724,7 +724,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
       novoStatus: "Concluir"
     };
 
-const urlStatus = 'https://script.google.com/macros/s/AKfycbywqYAsUno_YJrLIH9a3vvwzklcLZy-n-QcTzbzIFORnwMdmIrLWQafQkmtA5FwXpf9VA/exec';
+const urlStatus = 'https://script.google.com/macros/s/AKfycbydxklfPqLmARJQfjEJ2VYXwD-0VeWYmBu4gOt3hmu-4gLakeiTSnuIiT7HuwOD9I9SCg/exec';
 const urlCompras = 'https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec';
 
 const urlDestino = novoStatus === 'Comprar' ? urlCompras : urlStatus;
