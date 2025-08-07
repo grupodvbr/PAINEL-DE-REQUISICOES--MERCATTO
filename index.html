@@ -322,13 +322,13 @@
   <div style="margin-left: 20px; display: inline-block;">
   <label style="font-weight: bold; font-size: 0.9em;">
     Status:
-    <select id="filtroStatus" onchange="filtrar()" style="padding: 10px; font-size: 1em; border-radius: 6px; border: 1px solid #ccc;">
-      <option value="">TODOS</option>
-     <option value="PENDENTE" selected>PENDENTE</option>
-      <option value="Concluir">CONCLUIR</option>
-      <option value="Negar">NEGADOS</option>
-      <option value="Comprar">COMPRAR</option>
-    </select>
+    <select id="filtroStatus" onchange="filtrar()" style="...">
+  <option value="">TODOS</option>
+<option value="pendente" selected>PENDENTE</option>
+<option value="concluir">CONCLUIR</option>
+<option value="negar">NEGADOS</option>
+<option value="comprar">COMPRAR</option>
+</select>
   </label>
 </div>
 
@@ -411,21 +411,26 @@ if (carrinhoSalvo) {
   let requisicoes = [];
   let listaFiltrada = [];
 
-  async function carregarDados() {
+ async function carregarDados() {
+  try {
     const res = await fetch('https://script.google.com/macros/s/AKfycbwuyLxI582CuDVGlRWo4PMmRYJvqx9rtmMOuzHFd8bMLZ6zV57woKyRbiEplgW03JfMBg/exec');
+    
+    if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
+    
     const dados = await res.json();
 
     requisicoes = dados
-      .map((l, idx) => ({
-        linha: l.map(c => (c || '').toString().trim()),
-        idx
-      }))
+      .map((l, idx) => ({ linha: l.map(c => (c || '').toString().trim()), idx }))
       .sort((a, b) => new Date(a.linha[0]) - new Date(b.linha[0]));
 
     listaFiltrada = [...requisicoes];
     renderizarTabela(listaFiltrada);
     popularFiltros();
+  } catch (erro) {
+    alert("Erro ao carregar dados: " + erro.message);
+    console.error("Erro ao carregar dados:", erro);
   }
+}
 
   function renderizarTabela(lista) {
     const tabela = document.getElementById('tabelaRequisicoes');
@@ -482,10 +487,8 @@ if (carrinhoSalvo) {
           const dataFim = new Date(`${fimData}T${fimHora || '23:59'}`);
           if (dataHora > dataFim) return false;
         }
-        if (status && status !== '') {
-          const statusAtual = linha[7].toLowerCase() === "Pendente" ? "pendente" : linha[7].toLowerCase();
-          if (statusAtual !== status) return false;
-        }
+       if (status && linha[7]?.toLowerCase() !== status) return false;
+
         if (solicitante && !linha[5].toLowerCase().includes(solicitante)) return false;
         if (setor && !linha[4].toLowerCase().includes(setor)) return false;
         if (palavra) {
@@ -509,7 +512,8 @@ if (carrinhoSalvo) {
 
     const solicitanteSelect = document.getElementById('filtroSolicitante');
     const setorSelect = document.getElementById('filtroSetor');
-
+    solicitanteSelect.innerHTML = '<option value="">Todos</option>';
+    setorSelect.innerHTML = '<option value="">Todos</option>';
     solicitantes.forEach(nome => {
       const option = document.createElement('option');
       option.value = nome;
@@ -684,11 +688,13 @@ function atualizarStatus(linhaIndex, novoStatus) {
     headers: { 'Content-Type': 'application/json' }
   })
   .then(() => {
-    document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
-      btn.disabled = true;
-      btn.textContent = '🛒 No carrinho';
-    });
-  })
+  document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
+    btn.disabled = true;
+    btn.textContent = '🛒 No carrinho';
+  });
+  carregarDados(); // Atualiza a tabela depois de salvar
+})
+
   .catch(err => alert("Erro ao registrar carrinho: " + err));
 }
 
@@ -698,7 +704,7 @@ function atualizarStatus(linhaIndex, novoStatus) {
     .map((item, idx) => ({ item, idx }))
     .filter(({ item }) => {
       const status = item.linha[7].toLowerCase();
-      return status === "Pendente" || status === "pendente";
+      return status === "pendente";
     });
 
   if (pendentes.length === 0) {
@@ -749,7 +755,7 @@ function atualizarCarrinhoVisual() {
   const tbody = document.getElementById("tabelaCarrinhoModal");
   tbody.innerHTML = "";
 
-  carrinhoCompras.forEach(item => {
+  carrinhoCompras.forEach((item, index) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
   <td style="border:1px solid #ccc; padding:6px;">${item.item}</td>
