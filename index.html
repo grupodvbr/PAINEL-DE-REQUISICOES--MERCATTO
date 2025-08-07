@@ -669,34 +669,27 @@ function atualizarStatus(linhaIndex, novoStatus) {
     novoStatus: novoStatus
   };
 
-  if (novoStatus === 'Comprar') {
-    carrinhoCompras.push(payload);
-    atualizarCarrinhoVisual();
+ if (novoStatus === 'Comprar') {
+  carrinhoCompras.push(payload);
+  atualizarCarrinhoVisual();
 
-    // ✅ Desativa o botão corretamente
+  // ✅ Envia para a planilha com status "No carrinho"
+  const urlStatus = 'https://script.google.com/macros/s/AKfycbywqYAsUno_YJrLIH9a3vvwzklcLZy-n-QcTzbzIFORnwMdmIrLWQafQkmtA5FwXpf9VA/exec';
+
+  const payloadCarrinho = { ...payload, novoStatus: "No carrinho" };
+
+  fetch(urlStatus, {
+    method: 'POST',
+    body: JSON.stringify(payloadCarrinho),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(() => {
     document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
       btn.disabled = true;
       btn.textContent = '🛒 No carrinho';
     });
-
-  } else {
-    const urlStatus = 'https://script.google.com/macros/s/AKfycbywqYAsUno_YJrLIH9a3vvwzklcLZy-n-QcTzbzIFORnwMdmIrLWQafQkmtA5FwXpf9VA/exec';
-
-    fetch(urlStatus, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.text())
-    .then(msg => {
-      // ✅ Atualiza visualmente após sucesso
-      document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
-        btn.disabled = true;
-        btn.textContent = (novoStatus === 'Concluir') ? '✔️ Concluído' : '❌ Negado';
-      });
-    })
-    .catch(err => alert("Erro ao registrar: " + err));
-  }
+  })
+  .catch(err => alert("Erro ao registrar carrinho: " + err));
 }
 
 
