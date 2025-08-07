@@ -672,11 +672,13 @@ function atualizarStatus(linhaIndex, novoStatus) {
   if (novoStatus === 'Comprar') {
     carrinhoCompras.push(payload);
     atualizarCarrinhoVisual();
-    const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
-    btns.forEach(btn => {
+
+    // ✅ Desativa o botão corretamente
+    document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
       btn.disabled = true;
       btn.textContent = '🛒 No carrinho';
     });
+
   } else {
     const urlStatus = 'https://script.google.com/macros/s/AKfycbx671rvuzS6D1UHeUMRN09v7rkrkMXSadZAhpPbT-cTFNA9H1GXqBeGHYxJieFVQ38PdQ/exec';
 
@@ -687,16 +689,16 @@ function atualizarStatus(linhaIndex, novoStatus) {
     })
     .then(res => res.text())
     .then(msg => {
-      const btns = document.querySelectorAll(`tr:nth-child(${linhaIndex + 1}) .acoes button`);
-      btns.forEach(btn => {
+      // ✅ Atualiza visualmente após sucesso
+      document.querySelectorAll(`#tabelaRequisicoes tr:nth-child(${linhaIndex + 1}) .acoes button`).forEach(btn => {
         btn.disabled = true;
-        if (novoStatus === 'Concluir') btn.textContent = '✔️ Concluído';
-        else if (novoStatus === 'Negar') btn.textContent = '❌ Negado';
+        btn.textContent = (novoStatus === 'Concluir') ? '✔️ Concluído' : '❌ Negado';
       });
     })
     .catch(err => alert("Erro ao registrar: " + err));
   }
 }
+
 
     function concluirEmMassa() {
   const pendentes = listaFiltrada
