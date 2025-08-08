@@ -1,10 +1,11 @@
-<!-- Painel adaptado para REQUISIÇÕES MERCATTO com filtros e dados da planilha enviada -->
+<!-- Painel adaptado para REQUISIÇÕES MERCATTO com filtros, relatórios PDF e carrinho interativo -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>REQUISIÇÕES MERCATTO</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --cor-azul: #007bff;
@@ -66,25 +67,6 @@
       display: none;
       z-index: 9999;
     }
-    #overlay-carregando {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9998;
-    }
-    #overlay-carregando img {
-      width: 100px;
-      margin-bottom: 15px;
-    }
-    #overlay-carregando p {
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #444;
-    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -126,11 +108,6 @@
     <h1>REQUISIÇÕES MERCATTO</h1>
   </header>
 
-  <div id="overlay-carregando">
-    <img src="https://static.wixstatic.com/media/d830b0_8cec50a98bbf4775814dbfa5386585e8~mv2.png" alt="Carregando..." />
-    <p>Carregando dados...</p>
-  </div>
-
   <div class="filtros">
     <input type="date" id="dataInicio" placeholder="Data Início">
     <input type="date" id="dataFim" placeholder="Data Fim">
@@ -145,12 +122,13 @@
       <option value="ENTREGUE">ENTREGUE</option>
       <option value="SEM ESTOQUE">SEM ESTOQUE</option>
     </select>
-    <button onclick="carregarRequisicoes()">🔍 Filtrar</button>
-    <button onclick="liquidarMassa('ENTREGUE')">📦 Marcar como ENTREGUE</button>
-    <button onclick="mostrarCarrinho()">🛒 Ver Carrinho</button>
+    <select id="modoRelatorio">
+      <option value="SETOR">Por Setor</option>
+      <option value="SOLICITANTE">Por Solicitante</option>
+    </select>
+    <button onclick="gerarPDF()">📄 PDF</button>
+    <button onclick="mostrarCarrinho()">🛒 Carrinho</button>
   </div>
-
-  <div class="alerta" id="alertaStatus">Atualizando status...</div>
 
   <table>
     <thead>
@@ -183,11 +161,9 @@
     let dadosRequisicoes = [];
 
     async function carregarRequisicoes() {
-      document.getElementById("overlay-carregando").style.display = "flex";
       const res = await fetch(`${endpoint}?acao=ler`);
       dadosRequisicoes = await res.json();
       filtrarRequisicoes();
-      document.getElementById("overlay-carregando").style.display = "none";
     }
 
     function filtrarRequisicoes() {
@@ -198,25 +174,22 @@
       const filtroSolicitante = document.getElementById('filtroSolicitante').value.toLowerCase();
       const dataInicio = document.getElementById('dataInicio').value;
       const dataFim = document.getElementById('dataFim').value;
-
       const statusValidos = ['COMPRADO', 'NO CARRINHO', 'NEGADO', 'ENTREGUE', 'SEM ESTOQUE'];
 
-      dadosRequisicoes.forEach((item) => {
+      dadosRequisicoes.filter(item => {
         const dataFormatada = item.dataHora?.split(' ')[0] || '';
         const statusAtual = (item.status || '').trim().toUpperCase();
         const consideraPendente = !statusValidos.includes(statusAtual);
-        const statusFiltrado = filtroStatus.toUpperCase();
-
-        if (statusFiltrado !== 'TODOS') {
-          if (statusFiltrado === 'PENDENTE' && !consideraPendente) return;
-          if (statusFiltrado !== 'PENDENTE' && statusAtual !== statusFiltrado) return;
+        if (filtroStatus !== 'TODOS') {
+          if (filtroStatus === 'PENDENTE' && !consideraPendente) return false;
+          if (filtroStatus !== 'PENDENTE' && statusAtual !== filtroStatus.toUpperCase()) return false;
         }
-
-        if (filtroItem && !item.item.toLowerCase().includes(filtroItem)) return;
-        if (filtroSolicitante && !item.solicitante.toLowerCase().includes(filtroSolicitante)) return;
-        if (dataInicio && dataFormatada < dataInicio) return;
-        if (dataFim && dataFormatada > dataFim) return;
-
+        if (filtroItem && !item.item.toLowerCase().includes(filtroItem)) return false;
+        if (filtroSolicitante && !item.solicitante.toLowerCase().includes(filtroSolicitante)) return false;
+        if (dataInicio && dataFormatada < dataInicio) return false;
+        if (dataFim && dataFormatada > dataFim) return false;
+        return true;
+      }).forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.dataHora}</td>
@@ -226,7 +199,7 @@
           <td>${item.setor}</td>
           <td>${item.solicitante}</td>
           <td>${item.observacoes}</td>
-          <td>${statusAtual}</td>`;
+          <td>${item.status}</td>`;
         tabela.appendChild(tr);
       });
     }
@@ -236,10 +209,8 @@
       const lista = document.getElementById("listaCarrinho");
       carrinho.style.display = 'block';
       lista.innerHTML = '';
-
-      const itensCarrinho = dadosRequisicoes.filter(item => (item.status || '').trim().toUpperCase() === 'NO CARRINHO');
-
-      itensCarrinho.forEach((item, idx) => {
+      const itens = dadosRequisicoes.filter(i => (i.status || '').toUpperCase() === 'NO CARRINHO');
+      itens.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.item}</td>
@@ -265,46 +236,23 @@
       carregarRequisicoes();
     }
 
-    async function liquidarMassa(statusDesejado) {
-      const filtroStatus = document.getElementById('filtroStatus').value;
-      const filtroItem = document.getElementById('filtroItem').value.toLowerCase();
-      const filtroSolicitante = document.getElementById('filtroSolicitante').value.toLowerCase();
-      const dataInicio = document.getElementById('dataInicio').value;
-      const dataFim = document.getElementById('dataFim').value;
-
-      const statusValidos = ['COMPRADO', 'NO CARRINHO', 'NEGADO', 'ENTREGUE', 'SEM ESTOQUE'];
-
-      const filtrados = dadosRequisicoes.filter((item) => {
-        const dataFormatada = item.dataHora?.split(' ')[0] || '';
-        const statusAtual = (item.status || '').trim().toUpperCase();
-        const consideraPendente = !statusValidos.includes(statusAtual);
-
-        if (filtroStatus !== 'TODOS') {
-          if (filtroStatus === 'PENDENTE' && !consideraPendente) return false;
-          if (filtroStatus !== 'PENDENTE' && statusAtual !== filtroStatus.toUpperCase()) return false;
-        }
-        if (filtroItem && !item.item.toLowerCase().includes(filtroItem)) return false;
-        if (filtroSolicitante && !item.solicitante.toLowerCase().includes(filtroSolicitante)) return false;
-        if (dataInicio && dataFormatada < dataInicio) return false;
-        if (dataFim && dataFormatada > dataFim) return false;
-        return true;
+    function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const modo = document.getElementById('modoRelatorio').value;
+      doc.setFontSize(10);
+      doc.text("REQUISIÇÕES MERCATTO", 105, 15, null, null, 'center');
+      doc.text(`Relatório por ${modo}`, 105, 22, null, null, 'center');
+      doc.text(`Data: ${new Date().toLocaleDateString()}`, 105, 29, null, null, 'center');
+      const dadosFiltrados = Array.from(document.querySelectorAll('#tabelaRequisicoes tr')).map(row =>
+        Array.from(row.querySelectorAll('td')).map(cell => cell.innerText));
+      let y = 40;
+      dadosFiltrados.forEach(row => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(row.join(' | '), 10, y);
+        y += 6;
       });
-
-      mostrarAlerta("Atualizando status...");
-      for (const item of filtrados) {
-        await fetch(endpoint, {
-          method: 'POST',
-          body: JSON.stringify({ acao: 'atualizarStatus', index: item.index, status: statusDesejado })
-        });
-      }
-      carregarRequisicoes();
-    }
-
-    function mostrarAlerta(msg) {
-      const alerta = document.getElementById('alertaStatus');
-      alerta.textContent = msg;
-      alerta.style.display = 'block';
-      setTimeout(() => alerta.style.display = 'none', 3000);
+      doc.save(`Relatorio_Requisicoes_${modo}_${new Date().toLocaleDateString()}.pdf`);
     }
 
     carregarRequisicoes();
