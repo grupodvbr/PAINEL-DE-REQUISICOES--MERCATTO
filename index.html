@@ -100,6 +100,24 @@
       border: 1px solid #ddd;
       text-align: center;
     }
+    #carrinho {
+      margin: 10px;
+      padding: 10px;
+      background: white;
+      border: 1px solid #ccc;
+    }
+    #carrinho h2 {
+      margin-top: 0;
+      color: var(--cor-azul);
+    }
+    #carrinho table {
+      width: 100%;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    #carrinho input {
+      width: 60px;
+    }
   </style>
 </head>
 <body>
@@ -149,6 +167,16 @@
     </thead>
     <tbody id="tabelaRequisicoes"></tbody>
   </table>
+
+  <div id="carrinho" style="display:none">
+    <h2>🛒 Itens no Carrinho</h2>
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Qtd</th><th>Unidade</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="listaCarrinho"></tbody>
+    </table>
+  </div>
 
   <script>
     const endpoint = 'https://script.google.com/macros/s/AKfycbyKdPRq8z-XzHzGP0SfL_TEBVoceAzW9bdDgBVLu0W-EMN6YEkQU2AEq7NPW2k-41MHog/exec';
@@ -203,6 +231,40 @@
       });
     }
 
+    function mostrarCarrinho() {
+      const carrinho = document.getElementById("carrinho");
+      const lista = document.getElementById("listaCarrinho");
+      carrinho.style.display = 'block';
+      lista.innerHTML = '';
+
+      const itensCarrinho = dadosRequisicoes.filter(item => (item.status || '').trim().toUpperCase() === 'NO CARRINHO');
+
+      itensCarrinho.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.item}</td>
+          <td><input type="number" value="${item.qtd}" onchange="atualizarCampoCarrinho(${item.index}, 'qtd', this.value)"></td>
+          <td><input type="text" value="${item.unidade}" onchange="atualizarCampoCarrinho(${item.index}, 'unidade', this.value)"></td>
+          <td><button onclick="removerDoCarrinho(${item.index})">❌</button></td>`;
+        lista.appendChild(tr);
+      });
+    }
+
+    async function atualizarCampoCarrinho(index, campo, valor) {
+      await fetch(endpoint, {
+        method: 'POST',
+        body: JSON.stringify({ acao: 'atualizarCampo', index, campo, valor })
+      });
+    }
+
+    async function removerDoCarrinho(index) {
+      await fetch(endpoint, {
+        method: 'POST',
+        body: JSON.stringify({ acao: 'atualizarStatus', index, status: 'PENDENTE' })
+      });
+      carregarRequisicoes();
+    }
+
     async function liquidarMassa(statusDesejado) {
       const filtroStatus = document.getElementById('filtroStatus').value;
       const filtroItem = document.getElementById('filtroItem').value.toLowerCase();
@@ -243,11 +305,6 @@
       alerta.textContent = msg;
       alerta.style.display = 'block';
       setTimeout(() => alerta.style.display = 'none', 3000);
-    }
-
-    function mostrarCarrinho() {
-      document.getElementById('filtroStatus').value = 'NO CARRINHO';
-      filtrarRequisicoes();
     }
 
     carregarRequisicoes();
